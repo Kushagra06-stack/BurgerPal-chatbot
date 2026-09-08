@@ -8,7 +8,7 @@ from langchain.tools import tool
 from langgraph.checkpoint.memory import MemorySaver
 import streamlit as st
 
-model = ChatGroq(model="openai/gpt-oss-20b", streaming=True)
+model = ChatGroq(model="openai/gpt-oss-20b", streaming=True, max_tokens=512)
 search = KeenableSearch()
 
 if "memory" not in st.session_state:
@@ -29,14 +29,14 @@ def web_search(query: str) -> str:
     text = str(result)
     
     # Keep only first 6000 characters
-    return text[:6000]
+    return text[:2000]
 
 # Create agent
 agent = create_agent(
     model=model,
     tools=[web_search],
     checkpointer=st.session_state.memory,
-    system_prompt="You are a web search agent. Search the web and answer the user's question using the available search results."
+    system_prompt="You are BurgerPal, a concise assistant. Answer the user's question directly using the search results when needed. Do not explain your search process. Do not add disclaimers or extra commentaryKeep answers short and to the point unless the user asks for detail."
 )
 
 print(st.session_state.memory)
@@ -68,7 +68,10 @@ if query:
         message = ""
 
         for chunk in response:
-            message = message+chunk[0].content
-            space.write(message)
+            msg = chunk[0]
+            if hasattr(msg, "content") and msg.content:
+                message += msg.content
+                space.write(message)
 
         st.session_state.history.append({"role":"ai", "content":(message)})
+
