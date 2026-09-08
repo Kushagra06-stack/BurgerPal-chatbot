@@ -12,3 +12,5 @@ beautifulsoup4
 wikipedia
 langchain-text-splitters
 pydantic
+langchain-keenable==0.1.2
+langchain-keenable
